@@ -23,7 +23,7 @@ export interface CalendarEvent {
 }
 
 class HuiCalendarEventsCard extends LitElement implements LovelaceCard {
-  protected config?: Config;
+  private _config?: Config;
   private _hass?: HomeAssistant;
   private _events?: CalendarEvent[];
 
@@ -51,7 +51,7 @@ class HuiCalendarEventsCard extends LitElement implements LovelaceCard {
       throw new Error("Invalid Configuration: 'entities' must be defined");
     }
 
-    this.config = config;
+    this._config = config;
 
     if (!this._events) {
       this._events = [];
@@ -59,19 +59,21 @@ class HuiCalendarEventsCard extends LitElement implements LovelaceCard {
   }
 
   protected render(): TemplateResult {
-    if (!this.config || !this._events) {
+    if (!this._config || !this._events) {
       return html``;
     }
+    // TODO Put events into a map by date
     // TODO If no upcoming events, say so instead of not displaying the card
     // TODO Divider card between days
     // If first event on day, render date
     // If last event on day, render divider
     return html`
       ${this.renderStyle()}
-      <ha-card .header="${this.config.title}">
+      <ha-card .header="${this._config.title}">
         ${this._events!.map(
           (event) => html`
             <li>${event.summary}</li>
+            <div class="divider"></div>
           `
         )}
       </ha-card>
@@ -81,6 +83,11 @@ class HuiCalendarEventsCard extends LitElement implements LovelaceCard {
   private renderStyle(): TemplateResult {
     return html`
       <style>
+        .divider {
+          height: 1px;
+          background-color: var(--divider-color);
+          margin: 10px;
+        }
         .day-wrapper {
           border-bottom: 1px solid;
           margin-bottom: 10px;
@@ -161,7 +168,7 @@ class HuiCalendarEventsCard extends LitElement implements LovelaceCard {
 
   private _fetchAllEvents(): void {
     if (this._hass) {
-      this.config!.entities.forEach((entity) => {
+      this._config!.entities.forEach((entity) => {
         this._fetchEntityEvents(entity);
       });
       // this._events!.sort(
@@ -171,13 +178,12 @@ class HuiCalendarEventsCard extends LitElement implements LovelaceCard {
     }
   }
 
-  private async _fetchEntityEvents(entity: string): Promise<CalendarEvent[]> {
+  private async _fetchEntityEvents(entity: string): Promise<void> {
     // TODO Need to append to array
     this._events! = await fetchEvents(
       this._hass!,
-      `calendars/${entity}?start=2018-10-26T00:00:00Z&end=2018-12-02T00:00:00Z`
+      `calendars/${entity}?start=2018-11-03T00:00:00Z&end=2018-12-02T00:00:00Z`
     );
-    return this._events!;
   }
 
   // private _sortEvents(): void {
