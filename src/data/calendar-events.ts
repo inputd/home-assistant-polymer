@@ -1,12 +1,21 @@
 import { HomeAssistant } from "../types.js";
-import { CalendarEvent } from "../panels/lovelace/cards/hui-calendar-events-card.js";
+
+export interface CalendarEvent {
+  id: number;
+  summary?: string;
+  description?: string;
+  location?: string;
+  start?: {
+    date?: string;
+    dateTime?: string;
+  };
+  startDate?: Date;
+  end?: string;
+  endDate?: Date;
+  fullDay?: boolean;
+}
 
 export const fetchEvents = (
   hass: HomeAssistant,
   path: string
 ): Promise<CalendarEvent[]> => hass.callApi("GET", path);
-
-export const fetchCard = (hass: HomeAssistant): Promise<string> =>
-  hass.callApi("POST", "lovelace/config/card/get", {
-    card_id: "e5f7b484605e4105b4f7c0956b82418b",
-  });
