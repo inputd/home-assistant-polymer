@@ -68,13 +68,18 @@ class HuiAgendaCard extends LitElement implements LovelaceCard {
                 ${
                   this._events!.map(
                     (event) => html`
+                      <span>${this._formatDate(event)}</span>
                       <span
                         >${
                           event.start!.date
                             ? event.start!.date
                             : event.start!.dateTime
-                        }${event.summary}</span
+                        }</span
                       >
+                      <span>
+                        ${event.start!.date ? "All Day" : event.start!.dateTime}
+                      </span>
+                      <span>${event.summary}</span>
                       <div class="divider"></div>
                     `
                   )
@@ -100,6 +105,14 @@ class HuiAgendaCard extends LitElement implements LovelaceCard {
     `;
   }
 
+  private _formatDate(event: CalendarEvent): string {
+    const d = new Date(
+      event.start!.date ? event.start!.date! : event.start!.dateTime!
+    );
+
+    return d.toDateString();
+  }
+
   private _fetchAllEvents(): void {
     if (this._hass) {
       this._config!.entities.forEach((entity) => {
@@ -117,7 +130,7 @@ class HuiAgendaCard extends LitElement implements LovelaceCard {
     const startDate = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30);
-    this._events! = await fetchEvents(
+    this._events = await fetchEvents(
       this._hass!,
       `calendars/${entity}?start=${startDate.getFullYear()}-${startDate.getMonth() +
         1}-${startDate.getDate()}T00:00:00Z&end=${endDate.getFullYear()}-${endDate.getMonth() +
