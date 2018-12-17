@@ -3,6 +3,7 @@ import { Debouncer } from "@polymer/polymer/lib/utils/debounce";
 import { PolymerElement } from "@polymer/polymer/polymer-element";
 
 import LocalizeMixin from "../mixins/localize-mixin";
+import EventsMixin from "../mixins/events-mixin";
 
 import { computeHistory, fetchDate } from "./history";
 import { getRecent, getRecentWithCache } from "./cached-history";
@@ -10,7 +11,7 @@ import { getRecent, getRecentWithCache } from "./cached-history";
 /*
  * @appliesMixin LocalizeMixin
  */
-class HaStateHistoryData extends LocalizeMixin(PolymerElement) {
+class HaStateHistoryData extends EventsMixin(LocalizeMixin(PolymerElement)) {
   static get properties() {
     return {
       hass: {
@@ -145,6 +146,9 @@ class HaStateHistoryData extends LocalizeMixin(PolymerElement) {
 
     data.then((stateHistory) => {
       this._setData(stateHistory);
+      console.log("stateHistory");
+      console.log(stateHistory);
+      this.fire("change");
       this._setIsLoading(false);
     });
   }
@@ -163,7 +167,10 @@ class HaStateHistoryData extends LocalizeMixin(PolymerElement) {
           localize,
           language
         ).then((stateHistory) => {
+          console.log("stateHistory");
+          console.log(stateHistory);
           this._setData(Object.assign({}, stateHistory));
+          this.fire("change");
         });
       }, cacheConfig.refresh * 1000);
     }
