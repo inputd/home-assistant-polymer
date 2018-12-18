@@ -57,46 +57,42 @@ class HuiTimerEntityRow extends LitElement implements EntityRow {
     `;
   }
 
-  static get timerControlTemplate() {
-    return html`
-      <div>[[_computeDisplay(_stateObj, _timeRemaining)]]</div>
-    `;
-  }
+  // TODOD updated checks changedProps to see if stateObj for this entity changed
 
   private _stateObjChanged(stateObj: HassEntity) {
     if (stateObj) {
       this._startInterval(stateObj);
     } else {
-      this._clearInterval();
+      this._clearInterval(); // TODO If there is no stateObj, should we just not render. The stateObj doesn't get removed because the timer stops? I don't think this logic works as intended.
     }
   }
 
-  private _clearInterval() {
+  private _clearInterval(): void {
     if (this._updateRemaining) {
       clearInterval(this._updateRemaining);
       this._updateRemaining = null;
     }
   }
 
-  private _startInterval(stateObj: HassEntity) {
+  private _startInterval(stateObj: HassEntity): void {
     this._clearInterval();
     this._calculateRemaining(stateObj);
 
     if (stateObj.state === "active") {
       this._updateRemaining = setInterval(
-        () => this._calculateRemaining(this._stateObj),
+        () => this._calculateRemaining(stateObj),
         1000
       );
     }
   }
 
-  private _calculateRemaining(stateObj) {
+  private _calculateRemaining(stateObj): void {
     this._timeRemaining = timerTimeRemaining(stateObj);
   }
 
-  private _computeDisplay(stateObj: HassEntity, time: number) {
+  private _computeDisplay(stateObj: HassEntity, time: number): string {
     if (!stateObj) {
-      return null;
+      return "";
     }
 
     if (stateObj.state === "idle" || time === 0) {
@@ -110,10 +106,6 @@ class HuiTimerEntityRow extends LitElement implements EntityRow {
     }
 
     return display;
-  }
-
-  private _computeStateObj(states, entityId) {
-    return states && entityId in states ? states[entityId] : null;
   }
 }
 

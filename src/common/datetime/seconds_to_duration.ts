@@ -14,5 +14,5 @@ export default function secondsToDuration(d: number) {
   if (s > 0) {
     return "" + s;
   }
-  return null;
+  return "";
 }
