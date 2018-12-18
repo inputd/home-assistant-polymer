@@ -26,7 +26,7 @@ export interface Config extends LovelaceCardConfig {
   name?: string;
   image?: string;
   camera_image?: string;
-  state_image?: {};
+  state_image?: { [key: string]: string };
   aspect_ratio?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
