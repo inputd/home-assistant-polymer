@@ -17,7 +17,7 @@ import { Config } from "../../cards/hui-picture-entity-card";
 import { configElementStyle } from "./config-elements-style";
 import { ActionConfig } from "../../../../data/lovelace";
 
-import "../../components/hui-action-editor";
+import "../../components/hui-image-editor";
 import "../../../../components/entity/ha-entity-picker";
 
 const cardConfigStruct = struct({
@@ -89,6 +89,7 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
     }
 
     const actions = ["more-info", "toggle", "navigate", "call-service", "none"];
+    const images = ["image", "camera_image", "state_image"];
 
     return html`
       ${configElementStyle}
@@ -108,19 +109,11 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
             @value-changed="${this._valueChanged}"
           ></paper-input>
         </div>
-        <paper-input
-          label="Image Url"
-          .value="${this._image}"
-          .configValue="${"image"}"
-          @value-changed="${this._valueChanged}"
-        ></paper-input>
-        <ha-entity-picker
+        <hui-image-editor
           .hass="${this.hass}"
-          .value="${this._camera_image}"
-          .configValue=${"camera_image"}
-          domain-filter="camera"
+          .images="${images}"
           @change="${this._valueChanged}"
-        ></ha-entity-picker>
+        ></hui-image-editor>
         <div class="side-by-side">
           <hui-action-editor
             label="Tap Action"
