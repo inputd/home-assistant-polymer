@@ -19,6 +19,7 @@ import { ActionConfig } from "../../../../data/lovelace";
 
 import "../../components/hui-image-editor";
 import "../../../../components/entity/ha-entity-picker";
+import "../../components/hui-action-editor";
 
 const cardConfigStruct = struct({
   type: "string",
@@ -83,6 +84,31 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
     return this._config!.show_state || true;
   }
 
+  get _image_type(): string {
+    let type = "image";
+    if (this._config) {
+      if (this._config.image) {
+        type = "image";
+      }
+      if (this._config.camera_image) {
+        type = "camera_image";
+      }
+      if (this._config.state_image) {
+        type = "state_image";
+      }
+    }
+    return type;
+  }
+
+  get _image_value(): string | { [key: string]: string } {
+    return (
+      this._config!.image ||
+      this._config!.camera_image ||
+      this._config!.state_image ||
+      ""
+    );
+  }
+
   protected render(): TemplateResult {
     if (!this.hass) {
       return html``;
@@ -112,6 +138,8 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
         <hui-image-editor
           .hass="${this.hass}"
           .images="${images}"
+          .configValue="${this._image_type}"
+          .value="${this._image_value}"
           @change="${this._valueChanged}"
         ></hui-image-editor>
         <div class="side-by-side">

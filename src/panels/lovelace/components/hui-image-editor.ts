@@ -29,7 +29,7 @@ export class HuiImageEditor extends LitElement {
   protected hass?: HomeAssistant;
 
   static get properties(): PropertyDeclarations {
-    return { hass: {}, config: {} };
+    return { hass: {}, value: {}, images: {}, configValue: {} };
   }
 
   get _value(): string | { [key: string]: string } {
@@ -37,17 +37,19 @@ export class HuiImageEditor extends LitElement {
   }
 
   get _configValue(): string {
-    return this.configValue || "";
+    return this.configValue || "image";
   }
 
   protected render(): TemplateResult {
     if (!this.hass || !this.images) {
       return html``;
     }
+    console.log(this._value);
+    console.log(this._configValue);
     return html`
       <paper-dropdown-menu
         label=Image Type"
-        .configValue="${"image"}"
+        .configValue="${"image_type"}"
         @value-changed="${this._valueChanged}"
       >
         <paper-listbox
@@ -62,7 +64,7 @@ export class HuiImageEditor extends LitElement {
         </paper-listbox>
       </paper-dropdown-menu>
       ${
-        this._configValue === "url"
+        this._configValue === "image"
           ? html`
               <paper-input
                 label="Image Url"
@@ -106,14 +108,13 @@ export class HuiImageEditor extends LitElement {
       return;
     }
     const target = ev.target! as EditorTarget;
-    this.configValue = target.configValue;
+    this.configValue =
+      target.configValue === "image_type" ? target.value : target.configValue;
+    console.log(this.configValue);
     if (this._value === target.value) {
       return;
     }
-    if (this.configValue === target.value) {
-      this.value = "";
-    }
-    this.value = target.value;
+    this.value = this.configValue === target.value ? "" : target.value;
     fireEvent(this, "value-changed");
   }
 }
