@@ -190,6 +190,15 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
     ) {
       return;
     }
+    if (
+      target.configValue === "image" ||
+      target.configValue === "camera_image" ||
+      target.configValue === "state_image"
+    ) {
+      delete this._config.image;
+      delete this._config.camera_image;
+      delete this._config.state_image;
+    }
     if (target.configValue) {
       if (target.value === "") {
         delete this._config[target.configValue!];

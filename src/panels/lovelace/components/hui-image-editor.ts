@@ -109,9 +109,8 @@ export class HuiImageEditor extends LitElement {
     if (this._configValue === target.value) {
       return;
     }
-    this.value = "";
-    fireEvent(this, "value-changed");
     this.configValue = target.value;
+    fireEvent(this, "value-changed");
   }
 
   private _valueChanged(ev: Event): void {
