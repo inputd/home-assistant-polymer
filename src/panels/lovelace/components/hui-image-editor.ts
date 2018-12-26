@@ -44,13 +44,11 @@ export class HuiImageEditor extends LitElement {
     if (!this.hass || !this.images) {
       return html``;
     }
-    console.log(this._value);
-    console.log(this._configValue);
     return html`
       <paper-dropdown-menu
         label=Image Type"
         .configValue="${"image_type"}"
-        @value-changed="${this._valueChanged}"
+        @value-changed="${this._typeChanged}"
       >
         <paper-listbox
           slot="dropdown-content"
@@ -103,18 +101,28 @@ export class HuiImageEditor extends LitElement {
     `;
   }
 
+  private _typeChanged(ev: Event): void {
+    if (!this.hass) {
+      return;
+    }
+    const target = ev.target! as EditorTarget;
+    if (this._configValue === target.value) {
+      return;
+    }
+    this.value = "";
+    fireEvent(this, "value-changed");
+    this.configValue = target.value;
+  }
+
   private _valueChanged(ev: Event): void {
     if (!this.hass) {
       return;
     }
     const target = ev.target! as EditorTarget;
-    this.configValue =
-      target.configValue === "image_type" ? target.value : target.configValue;
-    console.log(this.configValue);
     if (this._value === target.value) {
       return;
     }
-    this.value = this.configValue === target.value ? "" : target.value;
+    this.value = target.value;
     fireEvent(this, "value-changed");
   }
 }
