@@ -26,7 +26,7 @@ const cardConfigStruct = struct({
   entity: "string?",
   image: "string?",
   camera_image: "string?",
-  state_image: "string?",
+  state_image: "object?",
   aspect_ratio: "string?",
   tap_action: actionConfigStruct,
   hold_action: actionConfigStruct,
@@ -188,6 +188,7 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
       this[`_${target.configValue}`] === target.value ||
       this[`_${target.configValue}`] === target.config
     ) {
+      console.log("Same {} : {}", this[`_${target.configValue}`], target.value);
       return;
     }
     if (
@@ -209,6 +210,7 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
         };
       }
     }
+    console.log("config-changed {}", this._config);
     fireEvent(this, "config-changed", { config: this._config });
   }
 }

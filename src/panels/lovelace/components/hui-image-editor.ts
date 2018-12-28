@@ -10,6 +10,8 @@ import "../../../components/ha-service-picker";
 import { HomeAssistant } from "../../../types";
 import { fireEvent, HASSDomEvent } from "../../../common/dom/fire_event";
 import { EditorTarget } from "../editor/types";
+import { PaperInputElement } from "@polymer/paper-input/paper-input";
+import { configElementStyle } from "../editor/config-elements/config-elements-style";
 
 declare global {
   // for fire event
@@ -33,7 +35,7 @@ export class HuiImageEditor extends LitElement {
   }
 
   get _value(): string | { [key: string]: string } {
-    return this.value || "";
+    return this.value || this.configValue === "state_image" ? {} : "";
   }
 
   get _configValue(): string {
@@ -45,6 +47,7 @@ export class HuiImageEditor extends LitElement {
       return html``;
     }
     return html`
+    ${configElementStyle}
       <paper-dropdown-menu
         label=Image Type"
         .configValue="${"image_type"}"
@@ -89,16 +92,41 @@ export class HuiImageEditor extends LitElement {
       ${
         this._configValue === "state_image"
           ? html`
-              <paper-input
-                label="State Image"
-                .value="${this._value}"
-                .configValue="${"state_image"}"
-                @value-changed="${this._valueChanged}"
-              ></paper-input>
+              <h3>State Images</h3>
+              ${
+                Object.keys(this._value).forEach((key) => {
+                  return html`
+                    <div class="side-by-side">
+                      <paper-input label="State" value="${key}"></paper-input>
+                      <paper-input
+                        label="Image Url"
+                        value="${this._value[key]}"
+                      ></paper-input>
+                    </div>
+                  `;
+                })
+              }
+              <div class="side-by-side">
+                <paper-input id="keyInput" label="State"></paper-input>
+                <paper-input id="valueInput" label="Image Url"></paper-input>
+                <paper-button
+                  @click="${this._valueChanged}"
+                  .configValue="${"state_image"}"
+                  >Add Data
+                </paper-button>
+              </div>
             `
           : ""
       }
     `;
+  }
+
+  private _keyInput(): PaperInputElement {
+    return this.shadowRoot!.getElementById("keyInput") as PaperInputElement;
+  }
+
+  private _valueInput(): PaperInputElement {
+    return this.shadowRoot!.getElementById("valueInput") as PaperInputElement;
   }
 
   private _typeChanged(ev: Event): void {
@@ -106,10 +134,8 @@ export class HuiImageEditor extends LitElement {
       return;
     }
     const target = ev.target! as EditorTarget;
-    if (this._configValue === target.value) {
-      return;
-    }
     this.configValue = target.value;
+    this.value = this.configValue === "state_image" ? {} : "";
     fireEvent(this, "value-changed");
   }
 
@@ -118,10 +144,22 @@ export class HuiImageEditor extends LitElement {
       return;
     }
     const target = ev.target! as EditorTarget;
-    if (this._value === target.value) {
-      return;
+    if (this.configValue === "state_image") {
+      if (this._value[this._keyInput().value!] === this._valueInput().value) {
+        return;
+      }
+      const data = this._value;
+      data[this._keyInput().value!] = this._valueInput().value;
+      this.value = data;
+      this._keyInput().value = "";
+      this._valueInput().value = "";
+    } else {
+      if (this._value === target.value) {
+        return;
+      }
+      this.value = target.value;
     }
-    this.value = target.value;
+
     fireEvent(this, "value-changed");
   }
 }
