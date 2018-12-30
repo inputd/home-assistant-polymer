@@ -52,18 +52,6 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
     return this._config!.entity || "";
   }
 
-  get _image(): string {
-    return this._config!.image || "";
-  }
-
-  get _camera_image(): string {
-    return this._config!.camera_image || "";
-  }
-
-  get _state_image(): { [key: string]: string } {
-    return this._config!.state_image || {};
-  }
-
   get _aspect_ratio(): string {
     return this._config!.aspect_ratio || "";
   }
@@ -113,10 +101,8 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
     if (!this.hass) {
       return html``;
     }
-
     const actions = ["more-info", "toggle", "navigate", "call-service", "none"];
     const images = ["image", "camera_image", "state_image"];
-
     return html`
       ${configElementStyle}
       <div class="card-config">
@@ -183,7 +169,10 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
       return;
     }
     const target = ev.target! as EditorTarget;
-    if (this[`_${target.configValue}`] === target.config) {
+    if (
+      this[`_${target.configValue}`] === target.config ||
+      target.configValue === target.value
+    ) {
       return;
     }
     if (
