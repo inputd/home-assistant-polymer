@@ -111,8 +111,12 @@ export class HuiImageEditor extends LitElement {
                       <paper-input
                         class="key"
                         label="State"
-                        value="${state.key}"
+                        .value="${state.key}"
                         .index="${index}"
+                        .key="${state.key}"
+                        .val="${state.value}"
+                        .configValue="${"key"}"
+                        @value-changed="${this._stateImageChanged}"
                         no-label-float
                       ></paper-input>
                       <paper-input
@@ -120,14 +124,18 @@ export class HuiImageEditor extends LitElement {
                         label="Image Url"
                         .value="${state.value}"
                         .index="${index}"
+                        .key="${state.key}"
+                        .val="${state.value}"
+                        .configValue="${"value"}"
+                        @value-changed="${this._stateImageChanged}"
                         no-label-float
                       ></paper-input>
                       <ha-icon
                         class="removeState"
-                        .configValue="${"state_image"}"
-                        @click="${this._valueChanged}"
+                        @click="${this._removeState}"
                         icon="hass:delete"
                         title="Remove State Image"
+                        .value="${state.key}"
                       >
                       </ha-icon>
                     </div>
@@ -210,6 +218,35 @@ export class HuiImageEditor extends LitElement {
 
   private _valueInput(): PaperInputElement {
     return this.shadowRoot!.getElementById("valueInput") as PaperInputElement;
+  }
+
+  private _stateImageChanged(ev: Event): void {
+    if (!this.value) {
+      return;
+    }
+    const target = ev.target! as EditorTarget;
+    delete this.value[target.key!];
+    if (target.configValue === "key") {
+      if (target.value === target.key) {
+        return;
+      }
+      this.value[target.value!] = target.val;
+    } else {
+      if (target.value === target.val) {
+        return;
+      }
+      this.value[target.key!] = target.value;
+    }
+    fireEvent(this, "value-changed");
+  }
+
+  private _removeState(ev: Event): void {
+    if (!this.value) {
+      return;
+    }
+    const target = ev.target! as EditorTarget;
+    delete this.value[target.value!];
+    fireEvent(this, "value-changed");
   }
 
   private _typeChanged(ev: Event): void {
