@@ -13,7 +13,7 @@ import { longPress } from "../common/directives/long-press-directive";
 import { hassLocalizeLitMixin } from "../../../mixins/lit-localize-mixin";
 import { HomeAssistant } from "../../../types";
 import { LovelaceCardConfig, ActionConfig } from "../../../data/lovelace";
-import { LovelaceCard } from "../types";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { handleClick } from "../common/handle-click";
 import { UNAVAILABLE } from "../../../data/entity";
 import {
@@ -21,12 +21,12 @@ import {
   createErrorCardConfig,
 } from "./hui-error-card";
 
-interface Config extends LovelaceCardConfig {
+export interface Config extends LovelaceCardConfig {
   entity: string;
   name?: string;
   image?: string;
   camera_image?: string;
-  state_image?: {};
+  state_image?: { [key: string]: string };
   aspect_ratio?: string;
   tap_action?: ActionConfig;
   hold_action?: ActionConfig;
@@ -36,6 +36,22 @@ interface Config extends LovelaceCardConfig {
 
 class HuiPictureEntityCard extends hassLocalizeLitMixin(LitElement)
   implements LovelaceCard {
+  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import(/* webpackChunkName: "hui-picture-entity-card-editor" */ "../editor/config-elements/hui-picture-entity-card-editor");
+    return document.createElement("hui-picture-entity-card-editor");
+  }
+
+  public static getStubConfig(): object {
+    return {
+      image:
+        "https://www.home-assistant.io/images/merchandise/shirt-frontpage.png",
+      tap_action: { action: "more-info" },
+      hold_action: { action: "none" },
+      show_name: true,
+      show_state: true,
+    };
+  }
+
   public hass?: HomeAssistant;
   private _config?: Config;
 
