@@ -140,7 +140,7 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
           .images="${images}"
           .configValue="${this._image_type}"
           .value="${this._image_value}"
-          @change="${this._valueChanged}"
+          @value-changed="${this._valueChanged}"
         ></hui-image-editor>
         <div class="side-by-side">
           <hui-action-editor
@@ -183,12 +183,7 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
       return;
     }
     const target = ev.target! as EditorTarget;
-
-    if (
-      this[`_${target.configValue}`] === target.value ||
-      this[`_${target.configValue}`] === target.config
-    ) {
-      console.log("Same {} : {}", this[`_${target.configValue}`], target.value);
+    if (this[`_${target.configValue}`] === target.config) {
       return;
     }
     if (
@@ -210,7 +205,6 @@ export class HuiPictureEntityCardEditor extends hassLocalizeLitMixin(LitElement)
         };
       }
     }
-    console.log("config-changed {}", this._config);
     fireEvent(this, "config-changed", { config: this._config });
   }
 }

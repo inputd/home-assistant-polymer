@@ -5,7 +5,8 @@ import "@polymer/paper-dropdown-menu/paper-dropdown-menu";
 import "@polymer/paper-item/paper-item";
 import "@polymer/paper-listbox/paper-listbox";
 
-import "../../../components/ha-service-picker";
+import "../../../components/entity/ha-entity-picker";
+import "../../../components/ha-icon";
 
 import { HomeAssistant } from "../../../types";
 import { fireEvent, HASSDomEvent } from "../../../common/dom/fire_event";
@@ -24,6 +25,11 @@ declare global {
   }
 }
 
+export interface StateImage {
+  key: string;
+  value: string;
+}
+
 export class HuiImageEditor extends LitElement {
   public value?: string | { [key: string]: string };
   public images?: string[];
@@ -35,7 +41,7 @@ export class HuiImageEditor extends LitElement {
   }
 
   get _value(): string | { [key: string]: string } {
-    return this.value || this.configValue === "state_image" ? {} : "";
+    return this.value || "";
   }
 
   get _configValue(): string {
@@ -46,8 +52,13 @@ export class HuiImageEditor extends LitElement {
     if (!this.hass || !this.images) {
       return html``;
     }
+
+    const states: StateImage[] = [];
+    Object.keys(this._value).forEach((key) => {
+      states.push({ key, value: this._value[key] });
+    });
     return html`
-    ${configElementStyle}
+    ${configElementStyle} ${this.renderStyle()}
       <paper-dropdown-menu
         label=Image Type"
         .configValue="${"image_type"}"
@@ -94,30 +105,102 @@ export class HuiImageEditor extends LitElement {
           ? html`
               <h3>State Images</h3>
               ${
-                Object.keys(this._value).forEach((key) => {
+                states.map((state, index) => {
                   return html`
-                    <div class="side-by-side">
-                      <paper-input label="State" value="${key}"></paper-input>
+                    <div class="state">
                       <paper-input
-                        label="Image Url"
-                        value="${this._value[key]}"
+                        class="key"
+                        label="State"
+                        value="${state.key}"
+                        .index="${index}"
+                        no-label-float
                       ></paper-input>
+                      <paper-input
+                        class="value"
+                        label="Image Url"
+                        .value="${state.value}"
+                        .index="${index}"
+                        no-label-float
+                      ></paper-input>
+                      <ha-icon
+                        class="removeState"
+                        .configValue="${"state_image"}"
+                        @click="${this._valueChanged}"
+                        icon="hass:delete"
+                        title="Remove State Image"
+                      >
+                      </ha-icon>
                     </div>
                   `;
                 })
               }
-              <div class="side-by-side">
-                <paper-input id="keyInput" label="State"></paper-input>
-                <paper-input id="valueInput" label="Image Url"></paper-input>
-                <paper-button
-                  @click="${this._valueChanged}"
+              <div class="stateInput">
+                <paper-input
+                  class="key"
+                  id="keyInput"
+                  label="State"
+                ></paper-input>
+                <paper-input
+                  class="value"
+                  id="valueInput"
+                  label="Image Url"
+                ></paper-input>
+                <ha-icon
+                  class="addState"
                   .configValue="${"state_image"}"
-                  >Add Data
-                </paper-button>
+                  @click="${this._valueChanged}"
+                  icon="hass:plus"
+                  title="Add State Image"
+                >
+                </ha-icon>
               </div>
             `
           : ""
       }
+    `;
+  }
+
+  private renderStyle(): TemplateResult {
+    return html`
+      <style>
+        .state > paper-input {
+          --paper-input-container-underline: {
+            display: none;
+          }
+          --paper-input-container-underline-focus: {
+            display: none;
+          }
+          --paper-input-container-underline-disabled: {
+            display: none;
+          }
+          position: relative;
+          top: 1px;
+        }
+        .state {
+          display: flex;
+        }
+        .stateInput {
+          display: flex;
+        }
+        .key {
+          flex: 2;
+          padding-right: 4px;
+        }
+        .value {
+          flex: 6;
+          padding-right: 4px;
+        }
+        .addState .removeState {
+          flex: 1;
+          cursor: pointer;
+        }
+        .addState {
+          padding-top: 27px;
+        }
+        .removeState {
+          padding-top: 8px;
+        }
+      </style>
     `;
   }
 
@@ -130,10 +213,10 @@ export class HuiImageEditor extends LitElement {
   }
 
   private _typeChanged(ev: Event): void {
-    if (!this.hass) {
+    const target = ev.target! as EditorTarget;
+    if (!this.hass || this.configValue === target.value) {
       return;
     }
-    const target = ev.target! as EditorTarget;
     this.configValue = target.value;
     this.value = this.configValue === "state_image" ? {} : "";
     fireEvent(this, "value-changed");
@@ -145,7 +228,11 @@ export class HuiImageEditor extends LitElement {
     }
     const target = ev.target! as EditorTarget;
     if (this.configValue === "state_image") {
-      if (this._value[this._keyInput().value!] === this._valueInput().value) {
+      if (
+        this._keyInput().value === "" ||
+        this._valueInput().value === "" ||
+        this._value[this._keyInput().value!] === this._valueInput().value
+      ) {
         return;
       }
       const data = this._value;
@@ -159,7 +246,6 @@ export class HuiImageEditor extends LitElement {
       }
       this.value = target.value;
     }
-
     fireEvent(this, "value-changed");
   }
 }
