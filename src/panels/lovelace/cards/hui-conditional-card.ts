@@ -1,21 +1,30 @@
 import { createCardElement } from "../common/create-card-element";
 import { computeCardSize } from "../common/compute-card-size";
 import { HomeAssistant } from "../../../types";
-import { LovelaceCard } from "../types";
+import { LovelaceCard, LovelaceCardEditor } from "../types";
 import { LovelaceCardConfig } from "../../../data/lovelace";
 
-interface Condition {
+export interface Condition {
   entity: string;
   state?: string;
   state_not?: string;
 }
 
-interface Config extends LovelaceCardConfig {
+export interface Config extends LovelaceCardConfig {
   card: LovelaceCardConfig;
   conditions: Condition[];
 }
 
 class HuiConditionalCard extends HTMLElement implements LovelaceCard {
+  public static async getConfigElement(): Promise<LovelaceCardEditor> {
+    await import(/* webpackChunkName: "hui-conditional-card-editor" */ "../editor/config-elements/hui-conditional-card-editor");
+    return document.createElement("hui-conditional-card-editor");
+  }
+
+  public static getStubConfig(): object {
+    return {};
+  }
+
   private _hass?: HomeAssistant;
   private _config?: Config;
   private _card?: LovelaceCard;
