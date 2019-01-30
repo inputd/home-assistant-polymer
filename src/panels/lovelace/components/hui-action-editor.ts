@@ -36,10 +36,11 @@ export class HuiActionEditor extends LitElement {
   public config?: ActionConfig;
   public label?: string;
   public actions?: string[];
+  public entity?: string;
   protected hass?: HomeAssistant;
 
   static get properties(): PropertyDeclarations {
-    return { hass: {}, config: {}, label: {}, actions: {} };
+    return { hass: {}, config: {}, label: {}, actions: {}, entity: {} };
   }
 
   get _action(): string {
@@ -48,7 +49,7 @@ export class HuiActionEditor extends LitElement {
 
   get _entity(): string {
     const _config = this.config! as MoreInfoActionConfig;
-    return _config.entity || "";
+    return _config.entity || this.entity || "";
   }
 
   get _navigation_path(): string {
