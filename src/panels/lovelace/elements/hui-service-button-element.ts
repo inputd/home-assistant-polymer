@@ -1,48 +1,40 @@
-import { html, LitElement, TemplateResult } from "lit-element";
-
-import "../../../components/buttons/ha-call-service-button";
+import {
+  html,
+  LitElement,
+  TemplateResult,
+  customElement,
+  property,
+  CSSResult,
+  css,
+} from "lit-element";
+import "@material/mwc-button";
 
 import { LovelaceElement, LovelaceElementConfig } from "./types";
 import { HomeAssistant } from "../../../types";
 
-export class HuiServiceButtonElement extends LitElement
-  implements LovelaceElement {
-  public hass?: HomeAssistant;
-  private _config?: LovelaceElementConfig;
-  private _domain?: string;
-  private _service?: string;
-
-  static get properties() {
-    return { _config: {} };
-  }
+@customElement("hui-button-element")
+export class HuiButtonElement extends LitElement implements LovelaceElement {
+  @property() public hass?: HomeAssistant;
+  @property() private _config?: LovelaceElementConfig;
 
   public setConfig(config: LovelaceElementConfig): void {
-    if (!config || !config.service) {
-      throw Error("Invalid Configuration: 'service' required");
+    if (!config) {
+      throw Error("Invalid Configuration");
     }
 
-    [this._domain, this._service] = config.service.split(".", 2);
-
-    if (!this._domain) {
-      throw Error("Invalid Configuration: 'service' does not have a domain");
-    }
-
-    if (!this._service) {
-      throw Error(
-        "Invalid Configuration: 'service' does not have a service name"
-      );
-    }
+    // TODO tap/hold action validators
 
     this._config = config;
   }
 
   protected render(): TemplateResult | void {
-    if (!this._config) {
+    if (!this._config || !this.hass) {
       return html``;
     }
 
+    const stateObj = this.hass.states[this._config.entity];
+
     return html`
-      ${this.renderStyle()}
       <ha-call-service-button
         .hass="${this.hass}"
         .domain="${this._domain}"
@@ -50,25 +42,26 @@ export class HuiServiceButtonElement extends LitElement
         .serviceData="${this._config.service_data}"
         >${this._config.title}</ha-call-service-button
       >
+      <mwc-button>
+        ${this._config.name !== "false"
+          ? this._config.name || computeStateName(stateObj)
+          : ""}
+      </mwc-button>
     `;
   }
 
-  private renderStyle(): TemplateResult {
-    return html`
-      <style>
-        ha-call-service-button {
-          color: var(--primary-color);
-          white-space: nowrap;
-        }
-      </style>
+  static get styles(): CSSResult {
+    return css`
+      mwc-button {
+        color: var(--primary-color);
+        white-space: nowrap;
+      }
     `;
   }
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "hui-service-button-element": HuiServiceButtonElement;
+    "hui-button-element": HuiButtonElement;
   }
 }
-
-customElements.define("hui-service-button-element", HuiServiceButtonElement);
