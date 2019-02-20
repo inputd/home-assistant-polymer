@@ -51,7 +51,7 @@ const cardConfigStruct = struct({
   entities: [entitiesConfigStruct],
 });
 
-@customElement("hui-entities-card")
+@customElement("hui-entities-card-editor")
 export class HuiEntitiesCardEditor extends LitElement
   implements LovelaceCardEditor {
   static get properties(): PropertyDeclarations {
